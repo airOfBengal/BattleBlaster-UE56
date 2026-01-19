@@ -2,6 +2,10 @@
 
 
 #include "Tank.h"
+#include "Camera/CameraComponent.h"
+#include "InputMappingContext.h"
+
+#include "Kismet/GameplayStatics.h"
 
 ATank::ATank()
 {
@@ -17,14 +21,13 @@ void ATank::BeginPlay()
 {
 	Super::BeginPlay();
 
-	APlayerController* PlayerController = Cast<APlayerController>(Controller);
-	if (PlayerController)
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
-		ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer();
-		if (LocalPlayer)
+		if (ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer())
 		{
-			UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer);
-			if (Subsystem) {
+			if (UEnhancedInputLocalPlayerSubsystem* Subsystem 
+				= ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer)) 
+			{
 				Subsystem->AddMappingContext(DefaultMappingContext, 0);
 			}
 		}		
@@ -43,4 +46,29 @@ void ATank::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	if (UEnhancedInputComponent* EIC 
+		= Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ATank::MoveInput);
+		EIC->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ATank::TurnInput);
+	}
+}
+
+void ATank::MoveInput(const FInputActionValue& Value)
+{
+	float InputValue = Value.Get<float>();
+	FVector DeltaLocation = FVector(0.0f, 0.0f, 0.0f);
+	DeltaLocation.X = Speed * InputValue * UGameplayStatics::GetWorldDeltaSeconds(GetWorld());
+
+	AddActorLocalOffset(DeltaLocation, true);
+}
+
+void ATank::TurnInput(const FInputActionValue& Value)
+{
+	float InputValue = Value.Get<float>();
+	//UE_LOG(LogTemp, Display, TEXT("Turn input: %f"), InputValue);
+
+	FRotator DeltaRotation = FRotator(0.0f, 0.0f, 0.0f);
+	DeltaRotation.Yaw = TurnRate * InputValue * GetWorld()->GetDeltaSeconds();
+	AddActorLocalRotation(DeltaRotation, true);
 }
