@@ -39,6 +39,15 @@ void ATank::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		FHitResult HitResult;
+		PlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult);
+
+		//DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 20.0f, 20, FColor::Green);
+
+		RotateTurret(HitResult.ImpactPoint);
+	}
 }
 
 // Called to bind functionality to input
@@ -70,5 +79,5 @@ void ATank::TurnInput(const FInputActionValue& Value)
 
 	FRotator DeltaRotation = FRotator(0.0f, 0.0f, 0.0f);
 	DeltaRotation.Yaw = TurnRate * InputValue * GetWorld()->GetDeltaSeconds();
-	AddActorLocalRotation(DeltaRotation, true);
+	AddActorLocalRotation(DeltaRotation, true);                                                                                                                         
 }
