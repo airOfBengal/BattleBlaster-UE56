@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+
+#include "GameFramework/ProjectileMovementComponent.h"
+
 #include "Projectile.generated.h"
 
 UCLASS()
@@ -26,4 +29,6 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* RootComp;
 
+	UPROPERTY(VisibleAnywhere)
+	UProjectileMovementComponent* ProjectileMovementComp;
 };
