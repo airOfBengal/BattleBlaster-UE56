@@ -42,3 +42,25 @@ void ABattleBluterGameMode::BeginPlay()
 		}
 	}
 }
+
+void ABattleBluterGameMode::ActorDied(AActor* DeadActor)
+{
+	if (DeadActor == Tank)
+	{
+		Tank->HandleDestruction();
+	}
+	else
+	{
+		ATower* DeadTower = Cast<ATower>(DeadActor);
+		if (DeadTower) {
+			TowerCount--;
+
+			if (TowerCount == 0)
+			{
+				UE_LOG(LogTemp, Display, TEXT("All tower destroyed!!!"));
+			}
+
+			DeadTower->HandleDestruction();
+		}
+	}
+}

@@ -49,3 +49,8 @@ void ABasePawn::Fire()
 	}
 }
 
+void ABasePawn::HandleDestruction()
+{
+
+}
+
