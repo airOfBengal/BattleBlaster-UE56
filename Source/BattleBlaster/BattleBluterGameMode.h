@@ -6,6 +6,9 @@
 #include "GameFramework/GameModeBase.h"
 
 #include "Tank.h"
+#include "ScreenMessage.h"
+
+#include "BattleBlasterGameInstance.h"
 
 #include "BattleBluterGameMode.generated.h"
 
@@ -22,6 +25,11 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UScreenMessage> ScreenMessageClass;
+
+	UScreenMessage* ScreenMessageWidget;
+
 	ATank* Tank;
 	int32 TowerCount;
 
@@ -40,4 +48,7 @@ public:
 	void ActorDied(AActor* DeadActor);
 	void OnGameOverTimerTimeout();
 	void OnCountdownTimerTimeout();
+
+private:
+	UBattleBlasterGameInstance* BattleBlasterGameInstance;
 };

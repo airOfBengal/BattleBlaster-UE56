@@ -5,14 +5,17 @@
 
 #include "Kismet/GameplayStatics.h"
 
-#include "BattleBlasterGameInstance.h"
-
 #include "Tower.h"
 
 void ABattleBluterGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
+	UGameInstance* GameInstance = GetGameInstance();
+	if (GameInstance)
+	{
+		BattleBlasterGameInstance = Cast<UBattleBlasterGameInstance>(GameInstance);
+	}
 
 	TArray<AActor*> Towers;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATower::StaticClass(), Towers);
@@ -45,6 +48,17 @@ void ABattleBluterGameMode::BeginPlay()
 		}
 	}
 
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (PlayerController)
+	{
+		ScreenMessageWidget = CreateWidget<UScreenMessage>(PlayerController, ScreenMessageClass);
+		if (ScreenMessageWidget)
+		{
+			ScreenMessageWidget->AddToPlayerScreen();
+			ScreenMessageWidget->SetMessageText(FString::Printf(TEXT("Level %d\nGet Ready!"), BattleBlasterGameInstance->CurrentLevelIndex));
+		}
+	}
+
 	CountdownSeconds = CountdownDelay;
 	GetWorldTimerManager().SetTimer(CountdownTimerHandle, this, &ABattleBluterGameMode::OnCountdownTimerTimeout, 1.0f, true);
 }
@@ -54,17 +68,21 @@ void ABattleBluterGameMode::OnCountdownTimerTimeout()
 	CountdownSeconds--;
 	if (CountdownSeconds > 0)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Countdown: %d"), CountdownSeconds);
+		//UE_LOG(LogTemp, Display, TEXT("Countdown: %d"), CountdownSeconds);
+		ScreenMessageWidget->SetMessageText(FString::FromInt(CountdownSeconds));
 	}
 	else if(CountdownSeconds == 0)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Go!"));
+		//UE_LOG(LogTemp, Display, TEXT("Go!"));
+		ScreenMessageWidget->SetMessageText("Go!");
 		Tank->SetPlayerEnabled(true);
 	}
 	else
 	{
 		GetWorldTimerManager().ClearTimer(CountdownTimerHandle);
-		UE_LOG(LogTemp, Display, TEXT("Clear timer"));
+		//UE_LOG(LogTemp, Display, TEXT("Clear timer"));
+		//ScreenMessageWidget->SetMessageText("");
+		ScreenMessageWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 
@@ -95,6 +113,10 @@ void ABattleBluterGameMode::ActorDied(AActor* DeadActor)
 
 	if (IsGameover)
 	{
+		FString GameOverString = IsVictory ? "Victory!" : "Defeat!";
+		ScreenMessageWidget->SetMessageText(GameOverString);
+		ScreenMessageWidget->SetVisibility(ESlateVisibility::Visible);
+
 		FTimerHandle GameOverTimerHandle;
 		GetWorldTimerManager().SetTimer(GameOverTimerHandle, this, &ABattleBluterGameMode::OnGameOverTimerTimeout, GameOverDelay, false);
 	}
@@ -102,20 +124,15 @@ void ABattleBluterGameMode::ActorDied(AActor* DeadActor)
 
 void ABattleBluterGameMode::OnGameOverTimerTimeout()
 {
-	UGameInstance* GameInstance = GetGameInstance();
-	if (GameInstance)
+	if (BattleBlasterGameInstance)
 	{
-		UBattleBlasterGameInstance* BattleBlasterGameInstance = Cast<UBattleBlasterGameInstance>(GameInstance);
-		if (BattleBlasterGameInstance)
+		if (IsVictory)
 		{
-			if (IsVictory)
-			{
-				BattleBlasterGameInstance->LoadNextLevel();
-			}
-			else
-			{
-				BattleBlasterGameInstance->RestartCurrentLevel();
-			}
+			BattleBlasterGameInstance->LoadNextLevel();
+		}
+		else
+		{
+			BattleBlasterGameInstance->RestartCurrentLevel();
 		}
 	}
 }
