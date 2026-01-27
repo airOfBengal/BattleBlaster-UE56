@@ -16,9 +16,16 @@ class BATTLEBLASTER_API UBattleBlasterGameInstance : public UGameInstance
 
 public:
 	UPROPERTY(EditAnywhere)
-	int LastLevel = 3;
+	int32 LastLevelIndex = 3;
 
 	UPROPERTY(VisibleAnywhere)
-	int CurrentLevel = 1;
+	int32 CurrentLevelIndex = 1;
+
+	void LoadNextLevel();
+	void RestartCurrentLevel();
+	void RestartGame();
+
+private:
+	void ChangeLevel(int32 Index);
 	
 };

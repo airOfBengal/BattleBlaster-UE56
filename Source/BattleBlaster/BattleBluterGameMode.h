@@ -28,6 +28,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	float GameOverDelay = 2.0f;
 
+	UPROPERTY(VisibleAnywhere)
+	bool IsVictory = false;
+
 	void ActorDied(AActor* DeadActor);
 	void OnGameOverTimerTimeout();
 };
