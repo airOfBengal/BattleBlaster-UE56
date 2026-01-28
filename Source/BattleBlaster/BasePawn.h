@@ -37,6 +37,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	UNiagaraSystem* DeathParticles;
 
+	UPROPERTY(EditAnywhere)
+	USoundBase* ExplodeSound;
+
 	void RotateTurret(FVector LookAtTarget);
 	void Fire();
 	void HandleDestruction();
